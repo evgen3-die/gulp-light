@@ -37,11 +37,17 @@ gulp.task('templates', function (done) {
 
 gulp.task('rebuildTemplates', ['templates'], function (done) {
     browserSync.reload();
-
     done();
 });
 
 gulp.task('styles', function (done) {
+    gulp.src("src/scss/main.scss")
+        .pipe(plumber())
+        .pipe(sass())
+        .pipe(autoprefixer())
+        .pipe(gulp.dest(distPath + '/css'))
+        .pipe(browserSync.stream());
+
     done();
 });
 
@@ -63,15 +69,15 @@ gulp.task('browser-sync', function (done) {
 gulp.task('watch', function (done) {
     gulp.watch('src/pug/**/*', ['rebuildTemplates']);
     gulp.watch('src/external/**/*', ['external']);
+    gulp.watch('src/scss/**/*.scss', ['styles']);
 
     done();
 });
 
 gulp.task('default', function (done) {
     runSequence(
-        ['templates', 'external'],
-        ['browser-sync', 'watch']
+        ['templates', 'external', 'styles'],
+        ['browser-sync', 'watch'],
+        done
     );
-
-    done();
 });
