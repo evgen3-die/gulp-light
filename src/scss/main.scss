@@ -1,6 +1,8 @@
 // global
+@import "sprite";
 @import "global/variables";
 @import "global/mixins";
 
 // blocks
-//@import "partials/mixins";
+@import "partials/main";
+

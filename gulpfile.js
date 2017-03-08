@@ -43,7 +43,9 @@ gulp.task('rebuildTemplates', ['templates'], function (done) {
 gulp.task('styles', function (done) {
     gulp.src("src/scss/main.scss")
         .pipe(plumber())
-        .pipe(sass())
+        .pipe(sass({
+            includePaths: ['tmp']
+        }))
         .pipe(autoprefixer())
         .pipe(gulp.dest(distPath + '/css'))
         .pipe(browserSync.stream());
@@ -52,6 +54,24 @@ gulp.task('styles', function (done) {
 });
 
 gulp.task('scripts', function (done) {
+    done();
+});
+
+gulp.task('sprite', function (done) {
+    var spriteData = gulp.src('src/sprite/*.png').pipe(spritesmith({
+        algorithm: 'binary-tree',
+        padding: 8,
+        imgPath: '../images/sprite.png',
+        imgName: 'sprite.png',
+        retinaImgPath: '../images/sprite@2x.png',
+        retinaImgName: 'sprite@2x.png',
+        retinaSrcFilter: '**/*@2x.png',
+        cssName: 'sprite.scss'
+    }));
+
+    var imgStream = spriteData.img.pipe(gulp.dest(distPath + '/images'));
+    var styleStream = spriteData.css.pipe(gulp.dest('tmp'));
+
     done();
 });
 
@@ -70,12 +90,14 @@ gulp.task('watch', function (done) {
     gulp.watch('src/pug/**/*', ['rebuildTemplates']);
     gulp.watch('src/external/**/*', ['external']);
     gulp.watch('src/scss/**/*.scss', ['styles']);
+    gulp.watch('src/sprite/**/*.png', ['sprite', 'styles']);
 
     done();
 });
 
 gulp.task('default', function (done) {
     runSequence(
+        'sprite',
         ['templates', 'external', 'styles'],
         ['browser-sync', 'watch'],
         done

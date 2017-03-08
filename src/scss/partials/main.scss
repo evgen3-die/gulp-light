@@ -1,0 +1,9 @@
+body {
+  margin: 0;
+
+  &:before {
+    @include retina-sprite($logo-group);
+    content: '';
+    display: block;
+  }
+}
