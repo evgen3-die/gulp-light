@@ -6,6 +6,7 @@ var gulp = require('gulp'),
     autoprefixer = require('gulp-autoprefixer'),
     plumber = require('gulp-plumber'),
     watch = require('gulp-watch'),
+    include = require('gulp-include'),
     spritesmith = require('gulp.spritesmith'),
     runSequence = require('run-sequence'),
     browserSync = require('browser-sync').create(),
@@ -54,6 +55,13 @@ gulp.task('styles', function (done) {
 });
 
 gulp.task('scripts', function (done) {
+    gulp.src('src/js/main.js')
+        .pipe(include({
+            includePaths: ['src/js']
+        }))
+        .pipe(gulp.dest(distPath + '/js'));
+
+    browserSync.reload();
     done();
 });
 
@@ -72,6 +80,7 @@ gulp.task('sprite', function (done) {
     var imgStream = spriteData.img.pipe(gulp.dest(distPath + '/images'));
     var styleStream = spriteData.css.pipe(gulp.dest('tmp'));
 
+    browserSync.reload();
     done();
 });
 
@@ -90,7 +99,8 @@ gulp.task('watch', function (done) {
     gulp.watch('src/pug/**/*', ['rebuildTemplates']);
     gulp.watch('src/external/**/*', ['external']);
     gulp.watch('src/scss/**/*.scss', ['styles']);
-    gulp.watch('src/sprite/**/*.png', ['sprite', 'styles']);
+    gulp.watch('src/js/**/*.js', ['scripts']);
+    gulp.watch('src/sprite/**/*.png', runSequence('sprite', 'styles'));
 
     done();
 });
@@ -98,7 +108,7 @@ gulp.task('watch', function (done) {
 gulp.task('default', function (done) {
     runSequence(
         'sprite',
-        ['templates', 'external', 'styles'],
+        ['templates', 'external', 'styles', 'scripts'],
         ['browser-sync', 'watch'],
         done
     );
