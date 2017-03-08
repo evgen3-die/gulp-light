@@ -13,12 +13,16 @@ var gulp = require('gulp'),
 
 var distPath = 'dist';
 
-gulp.task('external', function () {
+gulp.task('external', function (done) {
+    gulp.src('src/external/**/*')
+        .pipe(gulp.dest(distPath));
 
+    browserSync.reload();
+    done();
 });
 
-gulp.task('templates', function () {
-    return gulp.src('src/pug/*.pug')
+gulp.task('templates', function (done) {
+    gulp.src('src/pug/*.pug')
         .pipe(plumber())
         .pipe(data(function (file) {
             return JSON.parse(fs.readFileSync('src/pug/data/base.json'));
@@ -27,36 +31,47 @@ gulp.task('templates', function () {
             pretty: true
         }))
         .pipe(gulp.dest(distPath));
+
+    done();
 });
 
-gulp.task('rebuildTemplates', ['templates'], function () {
+gulp.task('rebuildTemplates', ['templates'], function (done) {
     browserSync.reload();
+
+    done();
 });
 
-gulp.task('styles', function () {
-
+gulp.task('styles', function (done) {
+    done();
 });
 
-gulp.task('scripts', function () {
-
+gulp.task('scripts', function (done) {
+    done();
 });
 
-gulp.task('browser-sync', function () {
+gulp.task('browser-sync', function (done) {
     browserSync.init({
         server: {
             baseDir: distPath
         },
         notify: false
     });
+
+    done();
 });
 
-gulp.task('watch', function () {
+gulp.task('watch', function (done) {
     gulp.watch('src/pug/**/*', ['rebuildTemplates']);
+    gulp.watch('src/external/**/*', ['external']);
+
+    done();
 });
 
-gulp.task('default', function () {
-    return runSequence(
-        ['templates'],
+gulp.task('default', function (done) {
+    runSequence(
+        ['templates', 'external'],
         ['browser-sync', 'watch']
     );
+
+    done();
 });
